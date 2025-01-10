@@ -2,6 +2,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
+class PhoneNumber {
+    private String value;
+    private String prefix;
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    @Override
+    public String toString() {
+        return "Phone number: " + this.getPrefix() + " " + this.getValue() + "\n";
+    }
+}
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 class PickUpPoint {
     private String name;
@@ -18,6 +36,15 @@ class PickUpPoint {
     private boolean easyAccessZone;
     private boolean airSensor;
     private String country;
+
+    @Override
+    public String toString() {
+        return "Pickup Point" + "\n" +
+                "\t name: " + this.getName() + "\n" +
+                "\t country: " + this.getCountry() + "\n" +
+                "\t location description: " + this.getLocationDescription() + "\n" +
+                "\t is 24/7: " + this.isLocation247() + "\n";
+    }
 
     static class Location {
         private double latitude;
@@ -185,18 +212,6 @@ class Parcel {
         private String email;
         private String name;
         private PhoneNumber phoneNumber;
-        static class PhoneNumber {
-            private String value;
-            private String prefix;
-
-            public String getValue() {
-                return value;
-            }
-
-            public String getPrefix() {
-                return prefix;
-            }
-        }
 
         public String getEmail() {
             return email;
@@ -209,6 +224,14 @@ class Parcel {
         public PhoneNumber getPhoneNumber() {
             return phoneNumber;
         }
+
+        @Override
+        public String toString() {
+            return "Receiver\n" +
+                    "\tEmail: " + this.getEmail() + "\n" +
+                    "\tName: " + this.getName() + "\n" +
+                    "\t" + this.getPhoneNumber();
+        }
     }
 
     static class Sender {
@@ -216,6 +239,12 @@ class Parcel {
 
         public String getName() {
             return name;
+        }
+
+        @Override
+        public String toString() {
+            return "Sender\n" +
+                    "\tname: " + name + '\n';
         }
     }
 
@@ -368,6 +397,10 @@ class Parcel {
 
     @Override
     public String toString() {
-        return "location: %s  shipment number: %s  sender: %s".formatted(this.pickUpPoint.getName(), this.shipmentNumber, this.sender.getName());
+        return  "Parcel " + this.getShipmentNumber() + "\n" +
+                this.getSender() +
+                this.getReceiver() +
+                this.getPickUpPoint() +
+                "status: " + this.getStatus() + "\n";
     }
 }

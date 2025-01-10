@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
@@ -10,17 +9,63 @@ public class Inpost {
     ObjectMapper mapper = new ObjectMapper();
     static HttpClient client = HttpClient.newHttpClient();
 
+    public String getPhonePrefix() {
+        return phonePrefix;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    boolean isAccessTokenSet() {
+        return this.accessToken != null;
+    }
+
+    void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    void setPhonePrefix(String phonePrefix) {
+        this.phonePrefix = phonePrefix;
+    }
+
     public String phonePrefix;
     public String phoneNumber;
     protected String accessToken;
     protected String refreshToken;
 
+    void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+    Inpost() {}
+
     Inpost(String phonePrefix, String phoneNumber) {
         this.phonePrefix = phonePrefix;
         this.phoneNumber = phoneNumber;
     }
+
     Inpost(String accessToken) {
         this.accessToken = accessToken;
+    }
+    Parcel getParcel(String shipmentNumber) {
+        try {
+            InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v4/parcels/tracked");
+            TrackedParcels trackedParcels = mapper.readValue(inpostRequest.body, TrackedParcels.class);
+
+            //there's probably a built-in function for this
+            for(Parcel parcel : trackedParcels.parcels) {
+                if(parcel.getShipmentNumber().equals(shipmentNumber)) {
+                    return parcel;
+                }
+            }
+            return new Parcel();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     Parcel[] getParcels() {
         try {
@@ -62,8 +107,8 @@ public class Inpost {
             //grab access token
             try {
                 SmsVerification smsVerification = mapper.readValue(inpostRequest.body, SmsVerification.class);
-                this.accessToken = smsVerification.authToken;
-                this.refreshToken = smsVerification.refreshToken;
+                this.setAccessToken(smsVerification.authToken);
+                this.setRefreshToken(smsVerification.refreshToken);
             } catch(Exception e) {
                 throw new RuntimeException(e);
             }

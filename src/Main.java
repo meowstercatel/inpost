@@ -1,23 +1,38 @@
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import java.io.IOException;
-import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.util.Optional;
 import java.util.Scanner;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public class Main {
+    static Inpost inpost = new Inpost();
+    public static void parseArguments(String[] args) {
+        for(int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            switch (arg) {
+                case "--token":
+                    inpost.setAccessToken("Bearer " + args[i+1]);
+                    break;
+                case "--package":
+                    Parcel parcel = inpost.getParcel(args[i+1]);
+                    System.out.println(parcel);
+                    System.exit(0);
+                    break;
+                case "--phone":
+                    String phonePrefix = args[i+1].substring(0, 3);
+                    String phoneNumber = args[i+1].substring(3);
+                    inpost.setPhonePrefix(phonePrefix);
+                    inpost.setPhoneNumber(phoneNumber);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     public static void main(String[] args) {
-        if(args.length != 0) {
-            //assuming that the first one is the access token
-            Inpost inpost = new Inpost("Bearer " + args[0]);
+        parseArguments(args);
+        if(inpost.isAccessTokenSet()) {
             inpost.listParcels();
             return;
+        }
+        if(inpost.getPhoneNumber() != null) {
+            inpost.listParcels();
         }
         Scanner scanner = new Scanner(System.in);
 
