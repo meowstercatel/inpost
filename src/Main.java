@@ -6,8 +6,11 @@ public class Main {
         for(int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch (arg) {
-                case "--token":
+                case "--access-token":
                     inpost.setAccessToken("Bearer " + args[i+1]);
+                    break;
+                case "--refresh-token":
+                    inpost.reauthenticate(args[i+1]);
                     break;
                 case "--package":
                     Parcel parcel = inpost.getParcel(args[i+1]);
@@ -31,18 +34,20 @@ public class Main {
             inpost.listParcels();
             return;
         }
-        if(inpost.getPhoneNumber() != null) {
-            inpost.listParcels();
-        }
+
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("enter your phone prefix (eg. +48): ");
-        String phonePrefix = scanner.next();
+        if(inpost.getPhoneNumber() == null) { //?? why did i put this here?
+            System.out.print("enter your phone prefix (eg. +48): ");
+            String phonePrefix = scanner.next();
 
-        System.out.print("enter your phone number: ");
-        String phoneNumber = scanner.next();
+            System.out.print("enter your phone number: ");
+            String phoneNumber = scanner.next();
 
-        Inpost inpost = new Inpost(phonePrefix, phoneNumber);
+            inpost.setPhonePrefix(phonePrefix);
+            inpost.setPhoneNumber(phoneNumber);
+        }
+
         if(!inpost.sendSmsCode()) {
             System.out.println("something went wrong when sending the sms code");
             return;

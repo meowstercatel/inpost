@@ -1,3 +1,5 @@
+import Authentication.Reauthentication;
+import Authentication.SmsVerification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
@@ -38,9 +40,6 @@ public class Inpost {
         this.accessToken = accessToken;
     }
 
-    void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
     Inpost() {}
 
     Inpost(String phonePrefix, String phoneNumber) {
@@ -48,9 +47,24 @@ public class Inpost {
         this.phoneNumber = phoneNumber;
     }
 
-    Inpost(String accessToken) {
-        this.accessToken = accessToken;
+    void reauthenticate(String refreshToken) {
+        try {
+            String data = """
+{
+  "refreshToken": "%s",
+  "phoneOS": "Android"
+}
+""".formatted(refreshToken);
+            InpostRequest reauthenticationRequest = request("https://api-inmobile-pl.easypack24.net/v1/authenticate", data);
+            Reauthentication reauthentication = mapper.readValue(reauthenticationRequest.body, Reauthentication.class);
+
+            this.setAccessToken(reauthentication.getAuthToken());
+            this.setRefreshToken(refreshToken);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
     Parcel getParcel(String shipmentNumber) {
         try {
             InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v4/parcels/tracked");
@@ -100,20 +114,20 @@ public class Inpost {
   },
   "smsCode": "%s",
   "devicePlatform": "Android"
-}
-                """.formatted(this.phonePrefix, this.phoneNumber, code);
-        InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v1/account/verification", data);
-        if(inpostRequest.statusCode == 200) {
-            //grab access token
-            try {
-                SmsVerification smsVerification = mapper.readValue(inpostRequest.body, SmsVerification.class);
-                this.setAccessToken(smsVerification.authToken);
-                this.setRefreshToken(smsVerification.refreshToken);
-            } catch(Exception e) {
-                throw new RuntimeException(e);
-            }
+}""".formatted(this.phonePrefix, this.phoneNumber, code);
+        try {
+            InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v1/account/verification", data);
+            SmsVerification smsVerification = mapper.readValue(inpostRequest.body, SmsVerification.class);
+            this.setRefreshToken(smsVerification.refreshToken);
+            this.setAccessToken(smsVerification.authToken);
+            return true;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
         }
-        return inpostRequest.statusCode == 200;
+    }
+
+    private void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public static InpostRequest request(String endpoint, String data) {
