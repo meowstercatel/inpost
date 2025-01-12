@@ -1,7 +1,5 @@
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.List;
-
 class PhoneNumber {
     private String value;
     private String prefix;
@@ -29,7 +27,7 @@ class PickUpPoint {
     private AddressDetails addressDetails;
     private int virtual;
     private String pointType;
-    private List<String> type;
+    private String[] type;
     private boolean location247;
     private boolean doubled;
     private String imageUrl;
@@ -120,7 +118,7 @@ class PickUpPoint {
         return pointType;
     }
 
-    public List<String> getType() {
+    public String[] getType() {
         return type;
     }
 
@@ -197,7 +195,7 @@ class Parcel {
     private Operations operations;
     private String status;
     private String statusGroup;
-    private List<LogEvent> eventLog;
+    private LogEvent[] eventLog;
     private String avizoTransactionStatus;
     private String ownershipStatus;
     private String economyParcel;
@@ -205,7 +203,7 @@ class Parcel {
     private String parcelSize;
     private Receiver receiver;
     private Sender sender;
-    private List<Event> events;
+    private Event[] events;
     private String[] sharedTo;
 
     static class Receiver {
@@ -355,11 +353,11 @@ class Parcel {
         return statusGroup;
     }
 
-    public List<LogEvent> getEventLog() {
+    public LogEvent[] getEventLog() {
         return eventLog;
     }
 
-    public List<Event> getEvents() {
+    public Event[] getEvents() {
         return events;
     }
 
@@ -397,10 +395,6 @@ class Parcel {
 
     @Override
     public String toString() {
-        return  "Parcel " + this.getShipmentNumber() + "\n" +
-                this.getSender() +
-                this.getReceiver() +
-                this.getPickUpPoint() +
-                "status: " + this.getStatus() + "\n";
+        return "%s|%s|%s|%s".formatted(this.shipmentNumber, this.status,  this.getPickUpPoint().getName(), this.getReceiver().getEmail());
     }
 }

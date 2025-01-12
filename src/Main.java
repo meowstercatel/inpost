@@ -31,13 +31,14 @@ public class Main {
     public static void main(String[] args) {
         parseArguments(args);
         if(inpost.isAccessTokenSet()) {
+            System.out.printf("You have %s inCoins!\n", inpost.getInCoins());
             inpost.listParcels();
             return;
         }
 
         Scanner scanner = new Scanner(System.in);
 
-        if(inpost.getPhoneNumber() == null) { //?? why did i put this here?
+        if(inpost.getPhoneNumber() == null) {
             System.out.print("enter your phone prefix (eg. +48): ");
             String phonePrefix = scanner.next();
 

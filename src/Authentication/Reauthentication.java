@@ -1,13 +1,5 @@
 package Authentication;
 
-
-/*
-{
-  "authToken": "Bearer fQ3m_cTYBNuY25JxB0-mFJX6gHfYklJlkClBCw_QWWs",
-  "reauthenticationRequired": false,
-  "pushIdStatus": "NOTIFICATIONS_ON"
-}
-*/
 public class Reauthentication {
     private String authToken;
     private String reauthenticationRequired;

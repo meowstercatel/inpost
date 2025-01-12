@@ -1,5 +1,7 @@
 import Authentication.Reauthentication;
 import Authentication.SmsVerification;
+import Misc.InCoins;
+import Misc.ParcelInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
@@ -55,9 +57,10 @@ public class Inpost {
   "phoneOS": "Android"
 }
 """.formatted(refreshToken);
-            InpostRequest reauthenticationRequest = request("https://api-inmobile-pl.easypack24.net/v1/authenticate", data);
-            Reauthentication reauthentication = mapper.readValue(reauthenticationRequest.body, Reauthentication.class);
+            InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v1/authenticate", data);
+            Reauthentication reauthentication = mapper.readValue(inpostRequest.body, Reauthentication.class);
 
+            System.out.printf("access token: %s\n", reauthentication.getAuthToken());
             this.setAccessToken(reauthentication.getAuthToken());
             this.setRefreshToken(refreshToken);
         } catch(Exception e) {
@@ -122,13 +125,42 @@ public class Inpost {
             this.setAccessToken(smsVerification.authToken);
             return true;
         } catch(Exception e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
     private void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    public int getInCoins() {
+        try {
+            InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/loyalty/v1/wallet/balance");
+            InCoins inCoins = mapper.readValue(inpostRequest.body, InCoins.class);
+            return inCoins.getCurrentBalance();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ParcelInfo getParcelInfo() {
+        try {
+            InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v2/prices/parcels?sourceCountryCode=PL");
+            return mapper.readValue(inpostRequest.body, ParcelInfo.class);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ParcelInfo getParcelInfo(String countryCode) {
+        try {
+            InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v2/prices/parcels?sourceCountryCode="+countryCode);
+            return mapper.readValue(inpostRequest.body, ParcelInfo.class);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public static InpostRequest request(String endpoint, String data) {
         System.out.println(data);
