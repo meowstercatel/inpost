@@ -3,23 +3,24 @@ import java.util.Scanner;
 public class Main {
     static Inpost inpost = new Inpost();
     public static void parseArguments(String[] args) {
-        for(int i = 0; i < args.length; i++) {
+        for(int i = 0; i < args.length-1; i++) {
             String arg = args[i];
+            String nextArg = args[i+1];
             switch (arg) {
                 case "--access-token":
-                    inpost.setAccessToken("Bearer " + args[i+1]);
+                    inpost.setAccessToken("Bearer " + nextArg);
                     break;
                 case "--refresh-token":
-                    inpost.reauthenticate(args[i+1]);
+                    inpost.reauthenticate(nextArg);
                     break;
                 case "--package":
-                    Parcel parcel = inpost.getParcel(args[i+1]);
+                    Parcel parcel = inpost.getParcel(nextArg);
                     System.out.println(parcel);
                     System.exit(0);
                     break;
                 case "--phone":
-                    String phonePrefix = args[i+1].substring(0, 3);
-                    String phoneNumber = args[i+1].substring(3);
+                    String phonePrefix = nextArg.substring(0, 3);
+                    String phoneNumber = nextArg.substring(3);
                     inpost.setPhonePrefix(phonePrefix);
                     inpost.setPhoneNumber(phoneNumber);
                     break;

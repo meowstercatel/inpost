@@ -51,12 +51,8 @@ public class Inpost {
 
     void reauthenticate(String refreshToken) {
         try {
-            String data = """
-{
-  "refreshToken": "%s",
-  "phoneOS": "Android"
-}
-""".formatted(refreshToken);
+            String data = "{\"refreshToken\": \"%s\",\"phoneOS\": \"Android\"}".formatted(refreshToken);
+
             InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v1/authenticate", data);
             Reauthentication reauthentication = mapper.readValue(inpostRequest.body, Reauthentication.class);
 
@@ -96,28 +92,14 @@ public class Inpost {
         }
     }
     boolean sendSmsCode() {
-        String data = """
-{
-  "phoneNumber": {
-    "prefix": "%s",
-    "value": "%s"
-  }
-}
-                """.formatted(this.phonePrefix, this.phoneNumber);
+        String data = "{\"phoneNumber\": {\"prefix\": \"%s\",\"value\": \"%s\"}}".formatted(this.phonePrefix, this.phoneNumber);
+
         InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v1/account", data);
         return inpostRequest.statusCode == 200;
     }
 
     boolean verifySmsCode(String code) {
-        String data = """
-{
-  "phoneNumber": {
-    "prefix": "%s",
-    "value": "%s"
-  },
-  "smsCode": "%s",
-  "devicePlatform": "Android"
-}""".formatted(this.phonePrefix, this.phoneNumber, code);
+        String data = "{\"phoneNumber\": {\"prefix\": \"%s\",\"value\": \"%s\"},\"smsCode\": \"%s\",\"devicePlatform\": \"Android\"}".formatted(this.phonePrefix, this.phoneNumber, code);
         try {
             InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v1/account/verification", data);
             SmsVerification smsVerification = mapper.readValue(inpostRequest.body, SmsVerification.class);
@@ -174,8 +156,6 @@ public class Inpost {
 
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-//            System.out.println("status code: " + response.statusCode());
-//            System.out.println("response body: " + response.body());
 
             return new InpostRequest(response.statusCode(), response.body());
         } catch (Exception e) {
@@ -194,8 +174,6 @@ public class Inpost {
 
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-//            System.out.println("status code: " + response.statusCode());
-//            System.out.println("response body: " + response.body());
 
             return new InpostRequest(response.statusCode(), response.body());
         } catch (Exception e) {
