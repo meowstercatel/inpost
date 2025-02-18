@@ -31,6 +31,12 @@ public class Main {
     }
     public static void main(String[] args) {
         parseArguments(args);
+
+        if(inpost.loadConfig()) {
+            inpost.listParcels();
+            return;
+        }
+
         if(inpost.isAccessTokenSet()) {
             System.out.printf("You have %s inCoins!\n", inpost.getInCoins());
             inpost.listParcels();
@@ -62,6 +68,7 @@ public class Main {
             System.out.println("something went wrong when verifying the sms code");
             return;
         }
+        inpost.saveConfig();
 
         System.out.println(inpost.refreshToken);
         System.out.println(inpost.accessToken);

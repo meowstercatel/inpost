@@ -246,6 +246,7 @@ class Parcel {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     static class Operations {
         private boolean manualArchive;
         private String autoArchivableSince;

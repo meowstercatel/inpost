@@ -1,9 +1,12 @@
 import Authentication.Reauthentication;
 import Authentication.SmsVerification;
+import Misc.Config;
 import Misc.InCoins;
 import Misc.ParcelInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,6 +15,34 @@ import java.net.http.HttpResponse;
 public class Inpost {
     ObjectMapper mapper = new ObjectMapper();
     static HttpClient client = HttpClient.newHttpClient();
+
+    void saveConfig() {
+        Config config = new Config();
+        config.setPhonePrefix(phonePrefix);
+        config.setPhoneNumber(phoneNumber);
+        config.setAccessToken(accessToken);
+        config.setRefreshToken(refreshToken);
+
+        try {
+            mapper.writeValue(new File("config.json"), config);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save config to config.json", e);
+        }
+    }
+
+    boolean loadConfig() {
+        try {
+            Config config = mapper.readValue(new File("config.json"), Config.class);
+            this.phonePrefix = config.getPhonePrefix();
+            this.phoneNumber = config.getPhoneNumber();
+            this.accessToken = config.getAccessToken();
+            this.refreshToken = config.getRefreshToken();
+            return true;
+        } catch (IOException e) {
+            return false;
+//            throw new RuntimeException("Failed to load configuration from config.json", e);
+        }
+    }
 
     public String getPhonePrefix() {
         return phonePrefix;
