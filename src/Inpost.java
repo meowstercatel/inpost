@@ -64,10 +64,20 @@ public class Inpost {
         this.phonePrefix = phonePrefix;
     }
 
-    public String phonePrefix;
-    public String phoneNumber;
-    protected String accessToken;
-    protected String refreshToken;
+    private String phonePrefix;
+    private String phoneNumber;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    private String accessToken;
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    private String refreshToken;
 
     void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
@@ -95,29 +105,29 @@ public class Inpost {
         }
     }
 
-    Parcel getParcel(String shipmentNumber) {
+    ForeignParcel getParcel(String shipmentNumber) {
         try {
             InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v4/parcels/tracked");
             TrackedParcels trackedParcels = mapper.readValue(inpostRequest.body, TrackedParcels.class);
 
             //there's probably a built-in function for this
-            for(Parcel parcel : trackedParcels.parcels) {
-                if(parcel.getShipmentNumber().equals(shipmentNumber)) {
-                    return parcel;
+            for(ForeignParcel foreignParcel : trackedParcels.foreignParcels) {
+                if(foreignParcel.getShipmentNumber().equals(shipmentNumber)) {
+                    return foreignParcel;
                 }
             }
-            return new Parcel();
+            return new ForeignParcel();
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
     }
-    Parcel[] getParcels() {
+    ForeignParcel[] getParcels() {
         try {
             InpostRequest inpostRequest = request("https://api-inmobile-pl.easypack24.net/v4/parcels/tracked");
             System.out.println(inpostRequest.body);
             TrackedParcels trackedParcels = mapper.readValue(inpostRequest.body, TrackedParcels.class);
 
-            return trackedParcels.parcels;
+            return trackedParcels.foreignParcels;
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
@@ -212,9 +222,17 @@ public class Inpost {
         }
     }
     public void listParcels() {
-        Parcel[] parcels = this.getParcels();
-        for(Parcel parcel : parcels) {
-            System.out.println(parcel);
+        ForeignParcel[] foreignParcels = this.getParcels();
+        for(ForeignParcel foreignParcel : foreignParcels) {
+            if(foreignParcel.getReceiver().getPhoneNumber().getValue().equals(this.phoneNumber)) {
+                // ta definicja nie jest solidna, ale wiadomo o co chodzi
+                // --> polimorfizm - traktowanie klas jako innych klas
+                // a więc działa to też w 2 stronę i castowanie to polimorfizm
+                PersonalParcel personalParcel = (PersonalParcel) foreignParcel;
+                System.out.println(personalParcel);
+            } else {
+                System.out.println(foreignParcel);
+            }
         }
     }
 }

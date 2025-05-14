@@ -1,4 +1,7 @@
+import Authentication.Reauthentication;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
 
 class PhoneNumber {
     private String value;
@@ -15,6 +18,70 @@ class PhoneNumber {
     @Override
     public String toString() {
         return "Phone number: " + this.getPrefix() + " " + this.getValue() + "\n";
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class Operations {
+    private boolean manualArchive;
+    private String autoArchivableSince;
+    private boolean delete;
+    private boolean collect;
+    private boolean expandAvizo;
+    private boolean highlight;
+    private String refreshUntil;
+    private String requestEasyAccessZone;
+    private boolean voicebot;
+    private boolean canShareToObserve;
+    private boolean canShareOpenCode;
+    private boolean canShareParcel;
+
+    public boolean isManualArchive() {
+        return manualArchive;
+    }
+
+    public String getAutoArchivableSince() {
+        return autoArchivableSince;
+    }
+
+    public boolean isDelete() {
+        return delete;
+    }
+
+    public boolean isCollect() {
+        return collect;
+    }
+
+    public boolean isExpandAvizo() {
+        return expandAvizo;
+    }
+
+    public boolean isHighlight() {
+        return highlight;
+    }
+
+    public String getRefreshUntil() {
+        return refreshUntil;
+    }
+
+    public String getRequestEasyAccessZone() {
+        return requestEasyAccessZone;
+    }
+
+    public boolean isVoicebot() {
+        return voicebot;
+    }
+
+    public boolean isCanShareToObserve() {
+        return canShareToObserve;
+    }
+
+    public boolean isCanShareOpenCode() {
+        return canShareOpenCode;
+    }
+
+    public boolean isCanShareParcel() {
+        return canShareParcel;
     }
 }
 
@@ -182,8 +249,52 @@ class Event {
     }
 }
 
+class Receiver {
+    private String email;
+    private String name;
+    private PhoneNumber phoneNumber;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public PhoneNumber getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "Receiver\n" +
+                "\tEmail: " + this.getEmail() + "\n" +
+                "\tName: " + this.getName() + "\n" +
+                "\t" + this.getPhoneNumber();
+    }
+}
+
+class Sender {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "Sender\n" +
+                "\tname: " + name + '\n';
+    }
+}
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-class Parcel {
+class ForeignParcel {
+    public void setShipmentNumber(String shipmentNumber) {
+        this.shipmentNumber = shipmentNumber;
+    }
+
     private String shipmentNumber;
     private String shipmentType;
     private int openCode;
@@ -205,110 +316,6 @@ class Parcel {
     private Sender sender;
     private Event[] events;
     private String[] sharedTo;
-
-    static class Receiver {
-        private String email;
-        private String name;
-        private PhoneNumber phoneNumber;
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public PhoneNumber getPhoneNumber() {
-            return phoneNumber;
-        }
-
-        @Override
-        public String toString() {
-            return "Receiver\n" +
-                    "\tEmail: " + this.getEmail() + "\n" +
-                    "\tName: " + this.getName() + "\n" +
-                    "\t" + this.getPhoneNumber();
-        }
-    }
-
-    static class Sender {
-        private String name;
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return "Sender\n" +
-                    "\tname: " + name + '\n';
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    static class Operations {
-        private boolean manualArchive;
-        private String autoArchivableSince;
-        private boolean delete;
-        private boolean collect;
-        private boolean expandAvizo;
-        private boolean highlight;
-        private String refreshUntil;
-        private String requestEasyAccessZone;
-        private boolean voicebot;
-        private boolean canShareToObserve;
-        private boolean canShareOpenCode;
-        private boolean canShareParcel;
-
-        public boolean isManualArchive() {
-            return manualArchive;
-        }
-
-        public String getAutoArchivableSince() {
-            return autoArchivableSince;
-        }
-
-        public boolean isDelete() {
-            return delete;
-        }
-
-        public boolean isCollect() {
-            return collect;
-        }
-
-        public boolean isExpandAvizo() {
-            return expandAvizo;
-        }
-
-        public boolean isHighlight() {
-            return highlight;
-        }
-
-        public String getRefreshUntil() {
-            return refreshUntil;
-        }
-
-        public String getRequestEasyAccessZone() {
-            return requestEasyAccessZone;
-        }
-
-        public boolean isVoicebot() {
-            return voicebot;
-        }
-
-        public boolean isCanShareToObserve() {
-            return canShareToObserve;
-        }
-
-        public boolean isCanShareOpenCode() {
-            return canShareOpenCode;
-        }
-
-        public boolean isCanShareParcel() {
-            return canShareParcel;
-        }
-    }
 
     public String getShipmentNumber() {
         return shipmentNumber;
@@ -397,5 +404,23 @@ class Parcel {
     @Override
     public String toString() {
         return "%s|%s|%s|%s".formatted(this.shipmentNumber, this.status,  this.getPickUpPoint().getName(), this.getReceiver().getEmail());
+    }
+}
+
+class PersonalParcel extends ForeignParcel {
+    public Byte[] generateQrCode() {
+        String qrCode = super.getQrCode();
+        //dummy implementation
+        return new Byte[qrCode.length()];
+    }
+    public void openLocker() {
+        String data = "{\"accessToken\": \"%s\",\"openCode\": \"%s\"}".formatted(inpost.getAccessToken(), super.getOpenCode());
+
+        InpostRequest inpostRequest = Inpost.request("https://api-inmobile-pl.easypack24.net/v1/OpenParcel", data);
+    }
+
+    @Override
+    public String toString() {
+        return "%s|%s|%s|%s".formatted(super.getShipmentNumber(), super.getStatus(),  this.getPickUpPoint().getName(), this.getReceiver().getEmail());
     }
 }

@@ -14,8 +14,8 @@ public class Main {
                     inpost.reauthenticate(nextArg);
                     break;
                 case "--package":
-                    Parcel parcel = inpost.getParcel(nextArg);
-                    System.out.println(parcel);
+                    ForeignParcel foreignParcel = inpost.getParcel(nextArg);
+                    System.out.println(foreignParcel);
                     System.exit(0);
                     break;
                 case "--phone":
@@ -70,8 +70,8 @@ public class Main {
         }
         inpost.saveConfig();
 
-        System.out.println(inpost.refreshToken);
-        System.out.println(inpost.accessToken);
+        System.out.println(inpost.getRefreshToken());
+        System.out.println(inpost.getAccessToken());
 
         System.out.println("\n\n");
         inpost.listParcels();
