@@ -413,7 +413,7 @@ class PersonalParcel extends ForeignParcel {
         //dummy implementation
         return new Byte[qrCode.length()];
     }
-    public void openLocker() {
+    public void openLocker(Inpost inpost) {
         String data = "{\"accessToken\": \"%s\",\"openCode\": \"%s\"}".formatted(inpost.getAccessToken(), super.getOpenCode());
 
         InpostRequest inpostRequest = Inpost.request("https://api-inmobile-pl.easypack24.net/v1/OpenParcel", data);
